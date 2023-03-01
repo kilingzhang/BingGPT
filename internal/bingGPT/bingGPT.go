@@ -5,18 +5,19 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/fasthttp/websocket"
-	"github.com/google/uuid"
-	"github.com/samber/lo"
 	"io"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/fasthttp/websocket"
+	"github.com/google/uuid"
+	"github.com/samber/lo"
 )
 
-const Split = ``
+const Split = `\x1e`
 
 type CreateNewConversationResponse struct {
 	ConversationId        string `json:"conversationId"`
