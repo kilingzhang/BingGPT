@@ -31,21 +31,21 @@ type CreateNewConversationResponse struct {
 
 type ConversationResponse struct {
 	Type         int `json:"type"`
-	InvocationId int `json:"invocationId"`
+	InvocationId int `json:"invocationId,string"`
 	Item         struct {
 		Messages []struct {
-			Text   string `json:"text,omitempty"`
+			Text   string `json:"text"`
 			Author string `json:"author"`
 			From   struct {
 				Id   string `json:"id"`
 				Name any    `json:"name"`
-			} `json:"from,omitempty"`
+			} `json:"from"`
 			CreatedAt     time.Time `json:"createdAt"`
 			Timestamp     time.Time `json:"timestamp"`
-			Locale        string    `json:"locale,omitempty"`
-			Market        string    `json:"market,omitempty"`
-			Region        string    `json:"region,omitempty"`
-			Location      string    `json:"location,omitempty"`
+			Locale        string    `json:"locale"`
+			Market        string    `json:"market"`
+			Region        string    `json:"region"`
+			Location      string    `json:"location"`
 			LocationHints []struct {
 				Country           string `json:"country"`
 				CountryConfidence int    `json:"countryConfidence"`
@@ -62,7 +62,7 @@ type ConversationResponse struct {
 					Height    any     `json:"height"`
 				} `json:"center"`
 				RegionType int `json:"regionType"`
-			} `json:"locationHints,omitempty"`
+			} `json:"locationHints"`
 			MessageId uuid.UUID `json:"messageId"`
 			RequestId uuid.UUID `json:"requestId"`
 			Offense   string    `json:"offense"`
@@ -73,9 +73,9 @@ type ConversationResponse struct {
 			} `json:"feedback"`
 			ContentOrigin string `json:"contentOrigin"`
 			Privacy       any    `json:"privacy"`
-			InputMethod   string `json:"inputMethod,omitempty"`
-			HiddenText    string `json:"hiddenText,omitempty"`
-			MessageType   string `json:"messageType,omitempty"`
+			InputMethod   string `json:"inputMethod"`
+			HiddenText    string `json:"hiddenText"`
+			MessageType   string `json:"messageType"`
 			AdaptiveCards []struct {
 				Type    string `json:"type"`
 				Version string `json:"version"`
@@ -91,12 +91,12 @@ type ConversationResponse struct {
 					Wrap bool   `json:"wrap,omitempty"`
 					Size string `json:"size,omitempty"`
 				} `json:"body"`
-			} `json:"adaptiveCards,omitempty"`
+			} `json:"adaptiveCards"`
 			SourceAttributions []struct {
 				ProviderDisplayName string `json:"providerDisplayName"`
 				SeeMoreUrl          string `json:"seeMoreUrl"`
 				SearchQuery         string `json:"searchQuery"`
-			} `json:"sourceAttributions,omitempty"`
+			} `json:"sourceAttributions"`
 			SuggestedResponses []struct {
 				Text        string    `json:"text"`
 				Author      string    `json:"author"`
@@ -112,8 +112,8 @@ type ConversationResponse struct {
 				} `json:"feedback"`
 				ContentOrigin string `json:"contentOrigin"`
 				Privacy       any    `json:"privacy"`
-			} `json:"suggestedResponses,omitempty"`
-			SpokenText string `json:"spokenText,omitempty"`
+			} `json:"suggestedResponses"`
+			SpokenText string `json:"spokenText"`
 		} `json:"messages"`
 		FirstNewMessageIndex   int       `json:"firstNewMessageIndex"`
 		SuggestedResponses     any       `json:"suggestedResponses"`
@@ -130,12 +130,12 @@ type ConversationResponse struct {
 			Message        string `json:"message"`
 			ServiceVersion string `json:"serviceVersion"`
 		} `json:"result"`
-	} `json:"item"`
+	} `json:"item,omitempty"`
 }
 
 type Option any
 
-func CreateNewConversation(ctx context.Context, cookies string) (response CreateNewConversationResponse, err error) {
+func CreateNewConversation(ctx context.Context, cookies string) (response *CreateNewConversationResponse, err error) {
 	const URL = "https://www.bing.com/turing/conversation/create"
 
 	request, err := http.NewRequestWithContext(ctx, "GET", URL, nil)
@@ -216,7 +216,7 @@ func CloseWebSocketConnection(ctx context.Context, conn *websocket.Conn) error {
 func SendMessageWebSocket(ctx context.Context, conn *websocket.Conn, message []byte) (err error) {
 	err = conn.WriteMessage(websocket.TextMessage, append(message, []byte(Split)...))
 	if err == nil {
-		log.Println("SendMessageWebSocket success !")
+		log.Printf("SendMessageWebSocket success ! %s\n", string(message))
 	}
 	return
 }
@@ -237,10 +237,45 @@ func SendConversation(ctx context.Context, conn *websocket.Conn, clientId, conve
 				"optionsSets": []any{
 					"nlu_direct_response_filter",
 					"deepleo",
-					"enable_debug_commands",
 					"disable_emoji_spoken_text",
 					"responsible_ai_policy_235",
 					"enablemm",
+					"harmonyv3",
+					"h3ads",
+					"rai253",
+					"cpcttl7d",
+					"blocklistv2",
+					"dv3sugg",
+				},
+				"allowedMessageTypes": []any{
+					"Chat",
+					"InternalSearchQuery",
+					"InternalSearchResult",
+					"Disengaged",
+					"InternalLoaderMessage",
+					"RenderCardRequest",
+					"AdsQuery",
+					"SemanticSerp",
+					"GenerateContentQuery",
+					"SearchQuery",
+				},
+				"sliceIds": []string{
+					"precibcf",
+					"228h3ads",
+					"h3ads",
+					"301rai253",
+					"301rai253",
+					"307retryscs0",
+					"307retryscs0",
+					"cache0307",
+					"ssoverlap50",
+					"ssplon",
+					"sssreduce",
+					"sswebtop2",
+					"302blocklist",
+					"308disbings0",
+					"224locals0",
+					"224locals0",
 				},
 				"isStartOfSession": invocationId == 0,
 				"message": map[string]any{
@@ -268,6 +303,7 @@ func ListenWebSocketConnection(ctx context.Context, conn *websocket.Conn, messag
 	for {
 		select {
 		case <-ctx.Done():
+			fmt.Println("ListenWebSocketConnection done.")
 			return CloseWebSocketConnection(ctx, conn)
 		default:
 			messageType, message, err := conn.ReadMessage()
