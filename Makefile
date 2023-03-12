@@ -11,7 +11,7 @@ gotidy:
 	export GOPROXY="https://goproxy.io,direct" &&  go mod tidy -compat=1.20 && go mod vendor
 
 .PHONY: run
-run:
+run:BingGPT
 	./bin/BingGPT_$(GOOS)_$(GOARCH)$(EXTENSION) server
 
 .PHONY: BingGPT

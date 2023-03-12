@@ -17,7 +17,7 @@ import (
 	"github.com/samber/lo"
 )
 
-const Split = `\x1e`
+const Split = ``
 
 type CreateNewConversationResponse struct {
 	ConversationId        string `json:"conversationId"`
